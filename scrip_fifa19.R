@@ -239,6 +239,112 @@ ggplot(df_acoes_aux_mglu, aes(x = DateMes, y = Media_Close, group = Year)) +
   ylab('Month') +
   geom_line(aes(y = Media_Open, color=Year), size=1, linetype = "dashed") 
 
+#---- Data set cadastro e compra
+
+df_cadastro = read.csv2('CADASTRO.csv', sep = ';')
+df_compras = read.csv2('COMPRAS.csv', sep = ';')
+
+df_cadastro %>% head()
+df_compras %>% head()
+
+df_cadastro %>% dim()
+df_compras %>% dim()
+
+df_trans = left_join(df_compras, df_cadastro, by = 'ï..Id')
+
+#---- Q12
+
+# Sua empresa considera jovem os clientes com menos de 30 anos. 
+# A partir disso, elabore um gráfico de barras comparando o gasto 
+# médio de clientes jovens e velhos. Ou seja, a altura da barra 
+# será o gasto médio do gasto de cada um dos grupos.
+
+# R.: O grupo não jovem tem um gasto médio de compras maior que o grupo não jovem. 
+
+df_trans = df_trans %>% 
+  mutate(Idade_Cat = case_when(.$Idade < 30 ~ 'Jovem',
+                               TRUE ~ 'Nao_Jovem'))
+
+windows(10, 6)
+df_trans %>% 
+  group_by(Idade_Cat) %>% 
+  summarise(Media_ValorCompra = mean(Valor_Compra, na.rm = T)) %>% 
+  ggplot(aes(y = Media_ValorCompra, x = Idade_Cat)) +
+  geom_bar(position="dodge", stat="identity") +
+  xlab('Grupo') +
+  ylab('Gasto Médio')
+
+#---- Q13
+
+# Crie uma função que, dado um número X, faça duas coisas: 
+# (1) retorna os números pares de 1 a 9 que não fazem parte de X; 
+# (2) retorna uma mensagem indicando se o número é par ou ímpar. 
+# Exemplo: se passarmos o número 239, a função deve retornar 4, 6, 8 e 
+# “ímpar”. Pode ser em forma de duas mensagens ou uma mensagem com os 
+# números e a definição de par ou ímpar. A escolha é sua.
+
+
+generate_identify_par = function(num_input){
+  X = c(1:9)
+  x_return = X[X%%2 == 0]
+  
+  msg_retunr = if(num_input %% 2 == 0){
+    'Par'
+  } else {
+    'Ímpar'
+  }
+  return(list('Valores pares' = x_return, 'Mensagem' = msg_retunr))
+}
+
+generate_identify_par(26)
+
+#---- Q14
+
+# Escreva uma função que receba uma string e retorne a mesma string 
+# sem nenhuma letra repetida. Exemplo: se a função receber a
+# palavra “casa”, ela deve retornar “cas”.
+
+
+generate_unique_sting = function(word){
+  word = as.character(word)
+  word_return = str_split(word, '') %>% 
+    unlist() %>% 
+    unique() %>% 
+    paste(., collapse = '')
+  return(word_return)
+}
+
+generate_unique_sting("Estatistica")
+
+#---- Q15
+
+# Escreva uma função chamada return_percentile que receba 
+# como entrada um array de dimensão (N,1) e um percentile qualquer, 
+# e retorne o valor referente a este percentile. Não vale usar as funções percentile, quartile, etc.
+
+return_percentile <- function(input_values, input_perc){
+  input_values_sort = sort(input_values)
+  len = length(input_values_sort)
+  
+  if('FALSE' %in% c(input_values == input_values_sort)) stop('The values most be ordered')
+  
+
+  if(len %% 2 == 0){
+    position_value = input_perc*len
+    return_percent = (input_values_sort[position_value] + input_values_sort[position_value+1])/2
+  } else{
+    position_value = input_perc*len
+    return_percent <- input_values_sort[ceiling(position_value)]
+  }
+  return(return_percent)
+}
+
+return_percentile(x_sort, 0.9)
+
+x = round(rnorm(10, 50))
+x_sort = sort(x)
+return_percentile(x_sort, 0.9)
+
 
 
 
